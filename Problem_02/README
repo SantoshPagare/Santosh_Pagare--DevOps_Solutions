@@ -4,6 +4,9 @@ I have used knife-ec2 to create a node using AWS EC2 service instead of using va
 
 This is a Amazon Linux instance(based on RHEL 6).
 
+Run the recipe as follows:
+[root@chef-ws cm]# knife cookbook upload cm && knife bootstrap 54.164.3.232 -N "CM_Node" -i /root/chef-repo/.chef/Chef.pem -x ec2-user --sudo -r 'recipe[cm]' -y
+
 Testing:
 1) Disable root login:
 $ ssh -i "Chef.pem" root@ec2-54-164-3-232.compute-1.amazonaws.com
