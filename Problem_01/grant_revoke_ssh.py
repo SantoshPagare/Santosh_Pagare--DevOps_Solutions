@@ -47,7 +47,6 @@ def remove_user_from_deny_list(username, line):
     fileToSearch = "/etc/ssh/sshd_config"
     textToSearch = line.rstrip('\\n')
 
-    #print textToSearch
     for line in fileinput.input(fileToSearch, inplace=True, backup='.bak'):
             if textToSearch in line:
                 print line.replace(username, "").rstrip('\\n')
@@ -60,8 +59,6 @@ def add_user_to_allow_list(username, line):
     textToSearch = line.rstrip('\\n')
     textToReplace = line.rstrip('\\n') + " " + username 
 
-    #print textToSearch
-    #print textToReplace    
     for line in fileinput.input(fileToSearch, inplace=True, backup='.bak'):
             if textToSearch in line:
                 print line.replace(textToSearch, textToReplace).rstrip('\\n')
@@ -86,14 +83,11 @@ def grant_ssh_access(username):
             print "The user %s is present in DenyUsers list. Removing it..." % username
             remove_user_from_deny_list(username, line)
         if re.search("#\s*AllowUsers", line):  # If AllowUsers entry is present, but commented out
-            # Do Nothing ie pass
             print "AllowUsers entry present but commented out: %s" % line
         elif re.search(r"AllowUsers(.*)(?=\\b%s\\b)" % username, line):
-            # Do nothing ie pass
             print "%s present : %s" % (username, line)
             flag = 1
         elif re.search(r"AllowUsers(.*)(?!\\b%s\\b)" % username, line):
-            # Add this entry
             print "%s not present : %s" % (username, line)
             print "Adding user %s to the allowed list..." % username
             add_user_to_allow_list(username, line.rstrip('\\n'))
@@ -120,8 +114,6 @@ def add_user_to_deny_list(username, line):
     textToSearch = line.rstrip('\\n')
     textToReplace = line.rstrip('\\n') + " " + username
 
-    #print textToSearch
-    #print textToReplace
     for line in fileinput.input(fileToSearch, inplace=True, backup='.bak'):
             if textToSearch in line:
                 print line.replace(textToSearch, textToReplace).rstrip('\\n')
@@ -133,14 +125,11 @@ def deny_ssh_access(username):
     flag = 0  # entry not present
     for line in f:
         if re.search("#\s*DenyUsers", line):  # If DenyUsers entry is present, but commented out
-            # Do Nothing ie pass
             print "DenyUsers entry present but commented out: %s" % line
         elif re.search(r"DenyUsers(.*)(?=\\b%s\\b)" % username, line):
-            # Do nothing ie pass
             print "%s present : %s" % (username, line)
             flag = 1
         elif re.search(r"DenyUsers(.*)(?!\\b%s\\b)" % username, line):
-            # Add this entry
             print "%s not present : %s" % (username, line)
             print "Adding user %s to the denied list..." % username
             add_user_to_deny_list(username, line.rstrip('\\n'))
@@ -165,11 +154,9 @@ elif args.action == 'revoke':
 with open("ssh_access.py", "w") as text_file:
     text_file.write("%s" % scriptlet)
 
-#print "scriptlet = %s" % scriptlet
 
 for ip in args.servers.split(","):
     print "Working on %s..." % ip
-    #proc = subprocess.Popen('ssh -o StrictHostKeyChecking=no -i ../AWS-Cert/Chef.pem ec2-user@%s sudo python < ./ssh_access.py' % ip,
     # Note that since we are granting SSH access to a user by adding the user to AllowUsers list,
     # make sure that the user(s) that had SSH access previously also should be added to this list.
     proc = subprocess.Popen('ssh -o StrictHostKeyChecking=no santosh@%s sudo python < ./ssh_access.py' % ip,

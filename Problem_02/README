@@ -8,10 +8,14 @@ Run the recipe as follows:
 [root@chef-ws cm]# knife cookbook upload cm && knife bootstrap 54.164.3.232 -N "CM_Node" -i /root/chef-repo/.chef/Chef.pem -x ec2-user --sudo -r 'recipe[cm]' -y
 
 Testing:
+
 1) Disable root login:
+
 $ ssh -i "Chef.pem" root@ec2-54-164-3-232.compute-1.amazonaws.com
 Permission denied (publickey).
+
 2) Allow restricted users:
+
 [ec2-user@ip-172-31-1-41 ~]$ tail /etc/ssh/sshd_config
 # override default of no subsystems
 Subsystem sftp  /usr/libexec/openssh/sftp-server
@@ -43,9 +47,11 @@ Run "sudo yum update" to apply all updates.
 [ec2-user@ip-172-31-1-41 ~]$ 
 
 3) Setup Public/Private keys for a user:
-The public/private ssh keys have been setup for 'sysadmin' user:
 
-4) MySQL root login - set password:
+The public/private ssh keys have been setup for 'sysadmin' user.
+
+4) MySQL : - set password for root login:
+
 [ec2-user@ip-172-31-1-41 ~]$ mysql -uroot -pnewpass
 Welcome to the MySQL monitor.  Commands end with ; or \g.
 Your MySQL connection id is 5
@@ -113,6 +119,8 @@ Check the link: http://<IP>/phpinfo.php to see the result of phpinfo() Or:
 <a href="http://www.php.net/"><img border="0" src="/phpinfo.php?=PHPE9568F34-D428-11d2-A769-00AA001ACF42" alt="PHP Logo" /></a><h1 class="p">PHP Version 5.3.29</h1>
 <tr><td class="e">PHP Version </td><td class="v">5.3.29 </td></tr>
 
+
 * Testing on Ubuntu and CentOS:
+
 I have tested the recipe on Amazon Linux(RHEL 6 based). I have added some code blocks for ubuntu in the recipe, but they have not been tested.
 
