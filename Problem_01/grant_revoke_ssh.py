@@ -73,7 +73,7 @@ def grant_ssh_access(username):
           pwd.getpwnam(username)
           print "User %s already exists" % username
     except KeyError:
-          print "User %s does not exist." % ussername
+          print "User %s does not exist." % username
           password = username
           encPass = crypt.crypt(password,"22")   
           print "Creating user %s" % username
