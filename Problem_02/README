@@ -1,0 +1,115 @@
+I have used knife-ec2 to create a node using AWS EC2 service instead of using vagrant.
+
+[root@chef-ws cm]# knife ec2 server create -N "CM_Node" -I ami-0b33d91d -f t2.micro --ssh-key Chef -i /root/chef-repo/.chef/Chef.pem --ssh-user ec2-user -g "sg-dfceb1a3" --subnet "subnet-2bd5fa62" -Z "us-east-1a" -T "Name=CM_Node" --region "us-east-1" --associate-public-ip
+
+This is a Amazon Linux instance(based on RHEL 6).
+
+Testing:
+1) Disable root login:
+$ ssh -i "Chef.pem" root@ec2-54-164-3-232.compute-1.amazonaws.com
+Permission denied (publickey).
+2) Allow restricted users:
+[ec2-user@ip-172-31-1-41 ~]$ tail /etc/ssh/sshd_config
+# override default of no subsystems
+Subsystem sftp  /usr/libexec/openssh/sftp-server
+
+# Example of overriding settings on a per-user basis
+#Match User anoncvs
+#       X11Forwarding no
+#       AllowTcpForwarding no
+#       PermitTTY no
+#       ForceCommand cvs server
+AllowUsers ec2-user
+
+Only ec2-user allowed to ssh:
+
+$ ssh -i "Chef.pem" ec2-user@ec2-54-164-3-232.compute-1.amazonaws.com
+The authenticity of host 'ec2-54-164-3-232.compute-1.amazonaws.com (54.164.3.232)' can't be established.
+RSA key fingerprint is cf:24:25:31:cb:69:92:ee:d9:87:03:1f:a2:60:f8:67.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added 'ec2-54-164-3-232.compute-1.amazonaws.com,54.164.3.232' (RSA) to the list of known hosts.
+Last login: Tue Mar 14 10:46:09 2017 from 54.243.19.139
+
+       __|  __|_  )
+       _|  (     /   Amazon Linux AMI
+      ___|\___|___|
+
+https://aws.amazon.com/amazon-linux-ami/2016.09-release-notes/
+6 package(s) needed for security, out of 8 available
+Run "sudo yum update" to apply all updates.
+[ec2-user@ip-172-31-1-41 ~]$ 
+
+3) Setup Public/Private keys for a user:
+The public/private ssh keys have been setup for 'sysadmin' user:
+
+4) MySQL root login - set password:
+[ec2-user@ip-172-31-1-41 ~]$ mysql -uroot -pnewpass
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 5
+Server version: 5.5.54 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> 
+
+5) Create new mysql user 'foo' with password 'bar':
+
+mysql> select host, user, password from mysql.user;
++----------------+------+-------------------------------------------+
+| host           | user | password                                  |
++----------------+------+-------------------------------------------+
+| localhost      | root | *D8DECEC305209EEFEC43008E1D420E1AA06B19E0 |
+| ip-172-31-1-41 | root |                                           |
+| 127.0.0.1      | root |                                           |
+| ::1            | root |                                           |
+| localhost      |      |                                           |
+| ip-172-31-1-41 |      |                                           |
+| localhost      | foo  | *E8D46CE25265E545D225A8A6F1BAF642FEBEE5CB |
++----------------+------+-------------------------------------------+
+7 rows in set (0.00 sec)
+
+mysql> exit
+
+[ec2-user@ip-172-31-1-41 ~]$ mysql -ufoo -pbar
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 4
+Server version: 5.5.54 MySQL Community Server (GPL)
+
+Copyright (c) 2000, 2016, Oracle and/or its affiliates. All rights reserved.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> 
+
+6) Setup Apache webserver and serve a php file with phpinfo():
+
+[root@ip-172-31-1-41 ~]# httpd -v
+Server version: Apache/2.2.31 (Unix)
+Server built:   Jul 19 2016 00:11:31
+
+[root@ip-172-31-1-41 ~]# service httpd status
+httpd (pid  4029) is running...
+[root@ip-172-31-1-41 ~]#
+
+Check the link: http://<IP>/phpinfo.php to see the result of phpinfo() Or:
+
+# curl localhost/phpinfo.php | grep 'PHP Version '
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 44206    0 44206    0     0  5917k      0 --:--:-- --:--:-- --:--:-- 6167k
+<a href="http://www.php.net/"><img border="0" src="/phpinfo.php?=PHPE9568F34-D428-11d2-A769-00AA001ACF42" alt="PHP Logo" /></a><h1 class="p">PHP Version 5.3.29</h1>
+<tr><td class="e">PHP Version </td><td class="v">5.3.29 </td></tr>
+
+* Testing on Ubuntu and CentOS:
+I have tested the recipe on Amazon Linux(RHEL 6 based). I have added some code blocks for ubuntu in the recipe, but they have not been tested.
+
