@@ -172,7 +172,7 @@ for ip in args.servers.split(","):
     #proc = subprocess.Popen('ssh -o StrictHostKeyChecking=no -i ../AWS-Cert/Chef.pem ec2-user@%s sudo python < ./ssh_access.py' % ip,
     # Note that since we are granting SSH access to a user by adding the user to AllowUsers list,
     # make sure that the user(s) that had SSH access previously also should be added to this list.
-    proc = subprocess.Popen('ssh -o StrictHostKeyChecking=no root@%s python < ./ssh_access.py' % ip,
+    proc = subprocess.Popen('ssh -o StrictHostKeyChecking=no santosh@%s python < ./ssh_access.py' % ip,
                             shell=True,
                             stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE,
